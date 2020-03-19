@@ -3,9 +3,11 @@
 # I'm attempting to make the filename as search-able as possible.
 # netstats to define that it is a log from this script, then a date and time arranged like YYYY-MM-DD-HHMMSS - from the number that changes the least to the one that changes the most.
 FILENAME="netstats-$(date +%F-%H%M%S)"
-# I'm also going to throw a very long regex string here that we will need for later, when we read the hosts file (and possibly the DNS servers):
+# I'm also going to throw two very long regex strings here that we will need for later, when we read the hosts file (and possibly the DNS servers):
 V4_REGGIE='(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
 V6_REGGIE='(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))'
+# Their functionality, as well as sources, are explained in the systemd-resolve block, where they're used the first time.
+
 # So I figured I could do one of two things, both involving tee (prints output and logs to a file):
 # 1. I could wrap the entire script in a giant function, and then pipe that function through tee.
 # 2. I could just append tee to the end of everything, everything after the first call to tee appending the file.
@@ -68,7 +70,7 @@ if [[ $USE_SYSD = '127.0.0.53' ]]; then
 	# For example, it would accept 999.999.999.999 as a valid IP address. The regex to get valid IPs only is... a fair bit longer.
 	#systemd-resolve --status | grep -E -o '([0-9]{1,3}[\.]){3}[0-9]{1,3}' | tee -a ./$FILENAME
 
-	# Now, what's the regex to return valid IPs? Well, we defined it earlier, in the variable IP_REGGIE !
+	# Now, what's the regex to return valid IPs? Well, we defined it earlier, in the variable V4_REGGIE! (And V6_REGGIE for IPv6 addresses.)
 	# Let's take this moment to dissect it, though.
 	# The meat and potatoes of it all can be seen in one of the parentheses: (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)
 	# If 25 are the first two numbers, the third has to be between 0-5.
